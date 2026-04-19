@@ -134,6 +134,17 @@
                 <p id="card-maestro" class="text-xl font-black uppercase"></p>
             </div>
         </div>
+        
+        <div class="grid grid-cols-2 border-b-2 border-black">
+            <div class="p-4 border-r-2 border-black">
+                <p class="card-label">Store Manager</p>
+                <p id="card-manager" class="text-xl font-black uppercase"></p>
+            </div>
+            <div class="p-4">
+                <p class="card-label">Date</p>
+                <p id="card-date" class="text-xl font-black uppercase"></p>
+            </div>
+        </div>
 
         <div class="p-0">
             <table class="audit-table border-none">
@@ -473,10 +484,15 @@
             calculateScore();
             const maestroVal = document.getElementById('audit_by').value.trim();
             const storeVal = document.getElementById('store_number').value.trim();
+            const managerVal = document.getElementById('manager_name').value.trim();
+            const rawDate = document.getElementById('date_of_visit').value;
+            const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-GB') : "";
             const actionVal = document.getElementById('action_points').value.trim();
 
             document.getElementById('card-maestro').innerHTML = maestroVal || '<span class="blank-line"></span>';
             document.getElementById('card-store').innerHTML = storeVal || '<span class="blank-line"></span>';
+            document.getElementById('card-manager').innerHTML = managerVal || '<span class="blank-line"></span>';
+            document.getElementById('card-date').innerHTML = dateStr || '<span class="blank-line"></span>';
             document.getElementById('card-action-points').textContent = actionVal || 'No comments or action points recorded.';
             
             generateCardTable();
