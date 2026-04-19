@@ -1,0 +1,652 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maestro Store Check</title>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/924/924514.png">
+    
+    <!-- Manifest Data URI -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIk1hZXN0cm8gU3RvcmUgQ2hlY2siLAogICJzaG9ydF9uYW1lIjogIlN0b3JlQ2hlY2siLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2ZmZmZmZiIsCiAgInRoZW1lX2NvbG9yIjogIiMwMDAwMDAiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2Nkbi1pY29ucy1wbmcuZmxhdGljb24uY29tLzUxMi85MjQvOTI0NTE0LnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            scroll-behavior: smooth;
+        }
+        
+        .main-card {
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            border: 1px solid #000;
+        }
+
+        .audit-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .audit-table th, .audit-table td {
+            border: 1px solid #000;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        .audit-table th {
+            background-color: #000;
+            color: #fff;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+        }
+        .section-header {
+            background-color: #f3f4f6;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .radio-cell {
+            text-align: center !important;
+            width: 60px;
+        }
+        .radio-cell input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #000;
+        }
+
+        #share-card {
+            position: fixed;
+            left: -9999px;
+            top: -9999px;
+            width: 800px;
+            background: white;
+            padding: 0;
+            color: black;
+        }
+
+        .card-label {
+            font-size: 10px;
+            font-weight: 900;
+            color: #000;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .blank-line {
+            display: inline-block;
+            min-width: 120px;
+            border-bottom: 1px solid #000;
+            height: 1.2em;
+            vertical-align: bottom;
+        }
+
+        .photo-preview {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1/1;
+            overflow: hidden;
+            border: 2px solid black;
+            border-radius: 4px;
+        }
+        .photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .score-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-weight: 900;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .section-comment-box {
+            width: 100%;
+            border: none;
+            border-top: 1px solid #eee;
+            padding: 8px;
+            font-size: 0.75rem;
+            outline: none;
+            background: #fafafa;
+            resize: none;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <!-- Share Graphic Template -->
+    <div id="share-card" class="flex flex-col border-[3px] border-black">
+        <div class="bg-black text-white p-6">
+            <h2 class="text-3xl font-black tracking-tighter uppercase">Maestro Store Check</h2>
+        </div>
+
+        <div class="grid grid-cols-2 border-b-2 border-black">
+            <div class="p-4 border-r-2 border-black">
+                <p class="card-label">Store Name</p>
+                <p id="card-store" class="text-xl font-black uppercase"></p>
+            </div>
+            <div class="p-4">
+                <p class="card-label">Maestro Name</p>
+                <p id="card-maestro" class="text-xl font-black uppercase"></p>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-2 border-b-2 border-black">
+            <div class="p-4 border-r-2 border-black">
+                <p class="card-label">Store Manager</p>
+                <p id="card-manager" class="text-xl font-black uppercase"></p>
+            </div>
+            <div class="p-4">
+                <p class="card-label">Date</p>
+                <p id="card-date" class="text-xl font-black uppercase"></p>
+            </div>
+        </div>
+
+        <div class="p-0">
+            <table class="audit-table border-none">
+                <thead>
+                    <tr>
+                        <th class="border-l-0">Checklist Item</th>
+                        <th class="radio-cell">Yes</th>
+                        <th class="radio-cell border-r-0">No</th>
+                    </tr>
+                </thead>
+                <tbody id="card-table-body"></tbody>
+            </table>
+        </div>
+
+        <div class="p-6 bg-gray-50 border-t-2 border-black">
+            <p class="text-xs font-black uppercase mb-2">Comments & Action Points</p>
+            <p id="card-action-points" class="text-sm text-black font-medium whitespace-pre-wrap min-h-[80px]"></p>
+        </div>
+    </div>
+
+    <!-- Main UI -->
+    <div id="audit-top" class="max-w-4xl mx-auto main-card overflow-hidden">
+        
+        <header class="bg-white border-b border-gray-100 p-6 sm:p-8">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h1 class="text-3xl font-black tracking-tight text-black uppercase">Store Check</h1>
+                    <p class="text-gray-500 font-medium">Digital checklist for Store Tools, Equipment & Standards</p>
+                </div>
+                <div class="text-right flex flex-col items-end gap-2">
+                    <div id="save-status" class="text-xs font-bold text-gray-400 bg-gray-50 px-3 py-1 rounded-full">READY</div>
+                    <button id="hard-reset-button" class="text-[9px] font-black text-red-500 uppercase hover:underline">Reset All Data</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase mb-1">Date of Visit</label>
+                        <input type="date" id="date_of_visit" name="date_of_visit" class="w-full p-2 border-b-2 border-black outline-none focus:bg-gray-50">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase mb-1">Store Name / Number</label>
+                        <input type="text" id="store_number" name="store_number" class="w-full p-2 border-b-2 border-black outline-none focus:bg-gray-50" placeholder="e.g. London #45">
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase mb-1">Maestro Name</label>
+                        <input type="text" id="audit_by" name="audit_by" class="w-full p-2 border-b-2 border-black outline-none focus:bg-gray-50" placeholder="Maestro Conducting Check">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase mb-1">Store Manager</label>
+                        <input type="text" id="manager_name" name="manager_name" class="w-full p-2 border-b-2 border-black outline-none focus:bg-gray-50" placeholder="Name">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="bg-white">
+            <table class="audit-table">
+                <thead>
+                    <tr>
+                        <th>Section / Checklist Item</th>
+                        <th class="radio-cell">Yes</th>
+                        <th class="radio-cell">No</th>
+                    </tr>
+                </thead>
+                <tbody id="main-table-body"></tbody>
+            </table>
+
+            <div class="px-6 py-8 border-t border-gray-100 bg-gray-50/50 flex flex-col items-center">
+                <input type="file" id="cameraInput" accept="image/*" capture="camera" class="hidden">
+                <button id="takePhotoButton" class="flex items-center gap-3 px-8 py-4 bg-black text-white rounded-full font-black uppercase text-sm hover:scale-105 active:scale-95 transition-all shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                    Add Evidence Photo
+                </button>
+                <div id="photo-gallery" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 w-full"></div>
+            </div>
+
+            <div class="p-6 border-t border-gray-200">
+                <h3 class="text-sm font-black uppercase mb-3">Comments & Action Points</h3>
+                <textarea id="action_points" name="action_points" class="w-full p-4 bg-gray-50 border border-black rounded-sm min-h-[140px] outline-none" placeholder="Note down requirements for improvement..."></textarea>
+            </div>
+        </main>
+
+        <footer class="bg-black text-white p-6 sm:p-10 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+            <div class="text-center sm:text-left">
+            </div>
+            
+            <div class="flex flex-row flex-wrap gap-2 justify-center w-full sm:w-auto">
+                <button id="reset-button" class="px-5 py-3 text-xs bg-red-600 hover:bg-red-700 text-white font-black uppercase rounded-sm transition">
+                    New Check
+                </button>
+                <button id="copy-report-button" class="px-5 py-3 text-xs bg-white text-black font-black uppercase rounded-sm transition">
+                    Copy Text
+                </button>
+                <button id="download-graphic-button" class="px-5 py-3 text-xs bg-green-500 text-white font-black uppercase rounded-sm transition">
+                    Download PNG
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const AUDIT_STORAGE_KEY = 'maestroStoreCheckDataV1'; 
+
+        const sections = [
+            { 
+                id: "tools",
+                title: "Tools & Parameters", 
+                questions: [
+                    "Coffee checklist up to date",
+                    "Weekly store coffee audits completed",
+                    "Coffee scale available and working",
+                    "14,5 - 15g coffee per grinder",
+                    "Boiler pressure 0.9 - 1.1 bar",
+                    "Pump pressure 8 - 10 bar",
+                    "Timers available",
+                    "20 - 22 sec RoP",
+                    "Button No 2 Volume 85 - 90 grams",
+                    "Button No 4 Volume 110 - 115 grams",
+                    "Shot glasses clean/non chipped",
+                    "Milk thermometers calibrated",
+                    "Cleaning material available",
+                    "Tool kit stocked (as per Mulmar list)"
+                ] 
+            },
+            { 
+                id: "equipment",
+                title: "Equipment", 
+                questions: [
+                    "Coffee machine clean",
+                    "Grinders clean",
+                    "Steam wands clean",
+                    "Handles & baskets clean",
+                    "Group heads clean",
+                    "Spout covers & screws secure",
+                    "Tamper clean and working",
+                    "Coffee drawers & knockouts in repair"
+                ] 
+            },
+            { 
+                id: "milk",
+                title: "Milk & Powders", 
+                questions: [
+                    "Milk jugs clean",
+                    "Correct milk jug in use",
+                    "Jug clips in use",
+                    "Milk steamed correctly",
+                    "Spoon & whisk container clean",
+                    "Powder containers clean & full"
+                ] 
+            },
+            { 
+                id: "service",
+                title: "Service Standards", 
+                questions: [
+                    "Clean non-chipped crockery",
+                    "Correct spoon used",
+                    "Small jugs for tea & Americano",
+                    "Takeaway lids secure",
+                    "Brita Filter in place & Reading",
+                    { text: "Coffee Score", type: "input" },
+                    { text: "Nero 90 Score", type: "input" }
+                ] 
+            }
+        ];
+
+        let qGlobalCount = 1;
+
+        function buildMainTable() {
+            const tbody = document.getElementById('main-table-body');
+            tbody.innerHTML = '';
+            qGlobalCount = 1;
+
+            sections.forEach(section => {
+                const headRow = document.createElement('tr');
+                headRow.className = "section-header";
+                headRow.innerHTML = `<td colspan="3" class="py-4 font-black">${section.title}</td>`;
+                tbody.appendChild(headRow);
+
+                section.questions.forEach(q => {
+                    const row = document.createElement('tr');
+                    const label = typeof q === 'string' ? q : q.text;
+                    const isInput = typeof q === 'object' && q.type === 'input';
+
+                    if (isInput) {
+                        row.innerHTML = `
+                            <td class="pl-6 font-medium">${label}</td>
+                            <td colspan="2" class="p-0">
+                                <input type="text" name="q${qGlobalCount}" class="score-input p-2" placeholder="Enter Score">
+                            </td>
+                        `;
+                    } else {
+                        row.innerHTML = `
+                            <td class="pl-6 font-medium">${label}</td>
+                            <td class="radio-cell"><input type="radio" name="q${qGlobalCount}" value="yes"></td>
+                            <td class="radio-cell"><input type="radio" name="q${qGlobalCount}" value="no"></td>
+                        `;
+                    }
+                    tbody.appendChild(row);
+                    qGlobalCount++;
+                });
+
+                // Add section comment row
+                const commentRow = document.createElement('tr');
+                commentRow.innerHTML = `
+                    <td colspan="3" class="p-0">
+                        <textarea name="comment_${section.id}" class="section-comment-box" placeholder="Comments for ${section.title}..."></textarea>
+                    </td>
+                `;
+                tbody.appendChild(commentRow);
+            });
+        }
+
+        function calculateScore() {
+            let totalPoints = 0;
+            let applicableCount = 0;
+            const totalQuestions = qGlobalCount - 1;
+            
+            for(let i=1; i<=totalQuestions; i++) {
+                const input = document.querySelector(`[name="q${i}"]`);
+                if (!input) continue;
+
+                if (input.type === 'radio') {
+                    const checked = document.querySelector(`input[name="q${i}"]:checked`);
+                    if (checked) {
+                        if (checked.value === 'yes') {
+                            totalPoints++;
+                            applicableCount++;
+                        } else if (checked.value === 'no') {
+                            applicableCount++;
+                        }
+                    }
+                }
+            }
+
+            document.getElementById('save-status').textContent = 'SAVED';
+            document.getElementById('save-status').className = 'text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full';
+
+            return { totalPoints, applicableCount };
+        }
+
+        function saveLocalData() {
+            const data = {};
+            document.querySelectorAll('[name]').forEach(input => {
+                if (input.type === 'radio') {
+                    if (input.checked) data[input.name] = input.value;
+                } else {
+                    data[input.name] = input.value;
+                }
+            });
+            localStorage.setItem(AUDIT_STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function loadLocalData() {
+            const saved = localStorage.getItem(AUDIT_STORAGE_KEY);
+            if (saved) {
+                const data = JSON.parse(saved);
+                Object.keys(data).forEach(key => {
+                    const input = document.querySelector(`[name="${key}"]`);
+                    if (input) {
+                        if (input.type === 'radio') {
+                            const radio = document.querySelector(`input[name="${key}"][value="${data[key]}"]`);
+                            if (radio) radio.checked = true;
+                        } else {
+                            input.value = data[key];
+                        }
+                    }
+                });
+                calculateScore();
+            }
+        }
+
+        function generateCardTable() {
+            const body = document.getElementById('card-table-body');
+            body.innerHTML = '';
+            let qCounter = 1;
+            
+            sections.forEach(section => {
+                const headRow = document.createElement('tr');
+                headRow.className = "section-header";
+                headRow.innerHTML = `<td colspan="3" class="border-x-0 font-black">${section.title}</td>`;
+                body.appendChild(headRow);
+
+                section.questions.forEach(q => {
+                    const label = typeof q === 'string' ? q : q.text;
+                    const isInput = typeof q === 'object' && q.type === 'input';
+                    const tr = document.createElement('tr');
+
+                    if (isInput) {
+                        const val = document.querySelector(`input[name="q${qCounter}"]`)?.value || '';
+                        tr.innerHTML = `
+                            <td class="border-l-0 text-black font-medium">${label}</td>
+                            <td colspan="2" class="radio-cell border-r-0 font-black text-lg text-black text-center">${val}</td>
+                        `;
+                    } else {
+                        const checked = document.querySelector(`input[name="q${qCounter}"]:checked`)?.value || '';
+                        tr.innerHTML = `
+                            <td class="border-l-0 text-black font-medium">${label}</td>
+                            <td class="radio-cell font-black text-lg text-black">${checked === 'yes' ? 'X' : ''}</td>
+                            <td class="radio-cell border-r-0 font-black text-lg text-black">${checked === 'no' ? 'X' : ''}</td>
+                        `;
+                    }
+                    body.appendChild(tr);
+                    qCounter++;
+                });
+            });
+        }
+
+        document.getElementById('takePhotoButton').addEventListener('click', () => {
+            document.getElementById('cameraInput').click();
+        });
+
+        document.getElementById('cameraInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const gallery = document.getElementById('photo-gallery');
+                const photoId = 'photo_' + Date.now();
+                const container = document.createElement('div');
+                container.className = 'flex flex-col gap-2';
+                container.id = photoId;
+                container.innerHTML = `
+                    <div class="photo-preview"><img src="${event.target.result}" alt="Audit Photo"></div>
+                    <div class="flex flex-col gap-1">
+                        <button onclick="downloadPhoto('${event.target.result}', '${photoId}')" class="w-full bg-blue-600 text-white text-[10px] font-black uppercase py-2 rounded-sm">Save</button>
+                        <button onclick="removePhoto('${photoId}')" class="w-full bg-gray-200 text-black text-[10px] font-black uppercase py-2 rounded-sm">Remove</button>
+                    </div>
+                `;
+                gallery.appendChild(container);
+                e.target.value = '';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function downloadPhoto(dataUrl, id) {
+            const link = document.createElement('a');
+            link.download = `Store_Check_Photo_${id}.jpg`;
+            link.href = dataUrl;
+            link.click();
+        }
+
+        function removePhoto(id) { document.getElementById(id).remove(); }
+
+        document.getElementById('download-graphic-button').addEventListener('click', () => {
+            calculateScore();
+            const maestroVal = document.getElementById('audit_by').value.trim();
+            const storeVal = document.getElementById('store_number').value.trim();
+            const managerVal = document.getElementById('manager_name').value.trim();
+            const rawDate = document.getElementById('date_of_visit').value;
+            const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-GB') : "";
+            
+            // Combine general comments with section-specific ones
+            let combinedComments = "";
+            sections.forEach(s => {
+                const sectionComment = document.querySelector(`[name="comment_${s.id}"]`).value.trim();
+                if (sectionComment) {
+                    combinedComments += `[${s.title}]\n${sectionComment}\n\n`;
+                }
+            });
+            const generalActionVal = document.getElementById('action_points').value.trim();
+            if (generalActionVal) combinedComments += `[General]\n${generalActionVal}`;
+
+            document.getElementById('card-maestro').innerHTML = maestroVal || '<span class="blank-line"></span>';
+            document.getElementById('card-store').innerHTML = storeVal || '<span class="blank-line"></span>';
+            document.getElementById('card-manager').innerHTML = managerVal || '<span class="blank-line"></span>';
+            document.getElementById('card-date').innerHTML = dateStr || '<span class="blank-line"></span>';
+            document.getElementById('card-action-points').textContent = combinedComments || 'No comments or action points recorded.';
+            
+            generateCardTable();
+
+            setTimeout(() => {
+                html2canvas(document.getElementById('share-card'), { scale: 2 }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `StoreCheck_${storeVal || 'Report'}.png`;
+                    link.href = canvas.toDataURL();
+                    link.click();
+                });
+            }, 100);
+        });
+
+        document.getElementById('copy-report-button').addEventListener('click', () => {
+            const rawDate = document.getElementById('date_of_visit').value;
+            const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-GB') : "[Date]";
+            const storeStr = document.getElementById('store_number').value || "";
+            const maestroStr = document.getElementById('audit_by').value || "";
+            const managerStr = document.getElementById('manager_name').value || "";
+            
+            // Combine all comments for text output
+            let combinedComments = "";
+            sections.forEach(s => {
+                const sectionComment = document.querySelector(`[name="comment_${s.id}"]`).value.trim();
+                if (sectionComment) {
+                    combinedComments += `[${s.title}]: ${sectionComment}\n`;
+                }
+            });
+            const generalActionVal = document.getElementById('action_points').value.trim();
+            if (generalActionVal) combinedComments += `[General]: ${generalActionVal}`;
+            
+            // Extract scores
+            let coffeeScore = "";
+            let nero90Score = "";
+            let qIdx = 1;
+            sections.forEach(s => s.questions.forEach(q => {
+                if(typeof q === 'object' && q.type === 'input') {
+                    const val = document.querySelector(`input[name="q${qIdx}"]`)?.value || "";
+                    if (q.text === "Coffee Score") coffeeScore = val;
+                    if (q.text === "Nero 90 Score") nero90Score = val;
+                }
+                qIdx++;
+            }));
+
+            const text = `MAESTRO STORE CHECK
+Date: ${dateStr}
+Store: ${storeStr}
+Maestro: ${maestroStr}
+Store Manager: ${managerStr}
+
+Coffee Score: ${coffeeScore}
+Nero 90 Score: ${nero90Score}
+
+Comments & Action Points:
+${combinedComments || "None"}`;
+
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            
+            const btn = document.getElementById('copy-report-button');
+            btn.textContent = 'COPIED!';
+            setTimeout(() => btn.textContent = 'COPY TEXT', 2000);
+        });
+
+        function showConfirmation(title, message, onConfirm) {
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = "fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[9999]";
+            modalOverlay.innerHTML = `
+                <div class="bg-white p-6 rounded-lg max-w-sm w-full border-2 border-black">
+                    <h3 class="font-black text-xl mb-4 uppercase tracking-tighter">${title}</h3>
+                    <p class="text-sm text-gray-600 mb-6">${message}</p>
+                    <div class="flex gap-2">
+                        <button id="modal-confirm" class="flex-1 bg-red-600 text-white font-black py-2 rounded-sm uppercase text-xs">Confirm</button>
+                        <button id="modal-cancel" class="flex-1 bg-gray-200 text-black font-black py-2 rounded-sm uppercase text-xs">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modalOverlay);
+            document.getElementById('modal-confirm').onclick = () => { onConfirm(); modalOverlay.remove(); };
+            document.getElementById('modal-cancel').onclick = () => modalOverlay.remove();
+        }
+
+        document.getElementById('hard-reset-button').addEventListener('click', () => {
+            showConfirmation("Wipe All?", "Clears the entire app including Store and Maestro info.", () => {
+                localStorage.removeItem(AUDIT_STORAGE_KEY);
+                location.reload();
+            });
+        });
+
+        document.getElementById('reset-button').addEventListener('click', () => {
+            showConfirmation("New Store Check?", "Resets all scores and action points. Keeps Store/Maestro details.", () => {
+                document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+                document.querySelectorAll('.score-input').forEach(i => i.value = '');
+                document.querySelectorAll('.section-comment-box').forEach(c => c.value = '');
+                document.getElementById('action_points').value = '';
+                document.getElementById('date_of_visit').value = '';
+                document.getElementById('photo-gallery').innerHTML = '';
+                
+                calculateScore();
+                saveLocalData();
+                document.getElementById('audit-top').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        buildMainTable();
+        document.querySelectorAll('input, textarea').forEach(input => {
+            input.addEventListener('input', () => {
+                calculateScore();
+                saveLocalData();
+            });
+        });
+
+        window.onload = loadLocalData;
+    </script>
+</body>
+</html>
+
+```
