@@ -114,6 +114,17 @@
             text-align: center;
             font-size: 1rem;
         }
+
+        .section-comment-box {
+            width: 100%;
+            border: none;
+            border-top: 1px solid #eee;
+            padding: 8px;
+            font-size: 0.75rem;
+            outline: none;
+            background: #fafafa;
+            resize: none;
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8">
@@ -160,7 +171,6 @@
         </div>
 
         <div class="p-6 bg-gray-50 border-t-2 border-black">
-            <p class="text-xs font-black uppercase mb-2">Comments & Action Points</p>
             <p id="card-action-points" class="text-sm text-black font-medium whitespace-pre-wrap min-h-[80px]"></p>
         </div>
     </div>
@@ -226,14 +236,13 @@
             </div>
 
             <div class="p-6 border-t border-gray-200">
-                <h3 class="text-sm font-black uppercase mb-3">Comments & Action Points</h3>
+                <h3 class="text-sm font-black uppercase mb-3">Action Points</h3>
                 <textarea id="action_points" name="action_points" class="w-full p-4 bg-gray-50 border border-black rounded-sm min-h-[140px] outline-none" placeholder="Note down requirements for improvement..."></textarea>
             </div>
         </main>
 
         <footer class="bg-black text-white p-6 sm:p-10 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <div class="text-center sm:text-left">
-                <!-- Compliance Score Display Removed From Footer UI -->
             </div>
             
             <div class="flex flex-row flex-wrap gap-2 justify-center w-full sm:w-auto">
@@ -251,10 +260,28 @@
     </div>
 
     <script>
+        // Inline Service Worker via Blob to satisfy PWA installation criteria
+        if ('serviceWorker' in navigator) {
+            const swContent = `
+                self.addEventListener('install', (event) => {
+                    self.skipWaiting();
+                });
+                self.addEventListener('fetch', (event) => {
+                    event.respondWith(fetch(event.request));
+                });
+            `;
+            const blob = new Blob([swContent], { type: 'application/javascript' });
+            const workerUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(workerUrl, { scope: './' })
+                .then(() => console.log('Service Worker Registered'))
+                .catch(err => console.error('Service Worker Registration Failed', err));
+        }
+
         const AUDIT_STORAGE_KEY = 'maestroStoreCheckDataV1'; 
 
         const sections = [
             { 
+                id: "tools",
                 title: "Tools & Parameters", 
                 questions: [
                     "Coffee checklist up to date",
@@ -274,6 +301,7 @@
                 ] 
             },
             { 
+                id: "equipment",
                 title: "Equipment", 
                 questions: [
                     "Coffee machine clean",
@@ -287,6 +315,7 @@
                 ] 
             },
             { 
+                id: "milk",
                 title: "Milk & Powders", 
                 questions: [
                     "Milk jugs clean",
@@ -298,6 +327,7 @@
                 ] 
             },
             { 
+                id: "service",
                 title: "Service Standards", 
                 questions: [
                     "Clean non-chipped crockery",
@@ -346,6 +376,15 @@
                     tbody.appendChild(row);
                     qGlobalCount++;
                 });
+
+                // Add section comment row
+                const commentRow = document.createElement('tr');
+                commentRow.innerHTML = `
+                    <td colspan="3" class="p-0">
+                        <textarea name="comment_${section.id}" class="section-comment-box" placeholder="Comments for ${section.title}..."></textarea>
+                    </td>
+                `;
+                tbody.appendChild(commentRow);
             });
         }
 
@@ -487,13 +526,24 @@
             const managerVal = document.getElementById('manager_name').value.trim();
             const rawDate = document.getElementById('date_of_visit').value;
             const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-GB') : "";
-            const actionVal = document.getElementById('action_points').value.trim();
+            
+            // Build the multi-part text for PNG output
+            let combinedComments = "";
+            sections.forEach(s => {
+                const sectionComment = document.querySelector(`[name="comment_${s.id}"]`).value.trim();
+                if (sectionComment) {
+                    combinedComments += `${s.title}: ${sectionComment}\n`;
+                }
+            });
+            const generalActionVal = document.getElementById('action_points').value.trim();
+
+            let pngOutput = "COMMENTS:\n" + (combinedComments || "None") + "\n\nACTION POINTS:\n" + (generalActionVal || "None");
 
             document.getElementById('card-maestro').innerHTML = maestroVal || '<span class="blank-line"></span>';
             document.getElementById('card-store').innerHTML = storeVal || '<span class="blank-line"></span>';
             document.getElementById('card-manager').innerHTML = managerVal || '<span class="blank-line"></span>';
             document.getElementById('card-date').innerHTML = dateStr || '<span class="blank-line"></span>';
-            document.getElementById('card-action-points').textContent = actionVal || 'No comments or action points recorded.';
+            document.getElementById('card-action-points').textContent = pngOutput;
             
             generateCardTable();
 
@@ -513,9 +563,19 @@
             const storeStr = document.getElementById('store_number').value || "";
             const maestroStr = document.getElementById('audit_by').value || "";
             const managerStr = document.getElementById('manager_name').value || "";
-            const actionStr = document.getElementById('action_points').value || "";
             
-            // Extract scores specifically
+            // Extract section-specific comments for the "Comments" field
+            let combinedComments = "";
+            sections.forEach(s => {
+                const sectionComment = document.querySelector(`[name="comment_${s.id}"]`).value.trim();
+                if (sectionComment) {
+                    combinedComments += `${s.title}: ${sectionComment}\n`;
+                }
+            });
+            
+            const generalActionVal = document.getElementById('action_points').value.trim();
+            
+            // Extract scores
             let coffeeScore = "";
             let nero90Score = "";
             let qIdx = 1;
@@ -537,8 +597,11 @@ Store Manager: ${managerStr}
 Coffee Score: ${coffeeScore}
 Nero 90 Score: ${nero90Score}
 
-Comments & Action Points:
-${actionStr}`;
+Comments:
+${combinedComments || "None"}
+
+Action Points:
+${generalActionVal || "None"}`;
 
             const el = document.createElement('textarea');
             el.value = text;
@@ -581,6 +644,7 @@ ${actionStr}`;
             showConfirmation("New Store Check?", "Resets all scores and action points. Keeps Store/Maestro details.", () => {
                 document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
                 document.querySelectorAll('.score-input').forEach(i => i.value = '');
+                document.querySelectorAll('.section-comment-box').forEach(c => c.value = '');
                 document.getElementById('action_points').value = '';
                 document.getElementById('date_of_visit').value = '';
                 document.getElementById('photo-gallery').innerHTML = '';
