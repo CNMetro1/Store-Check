@@ -172,7 +172,6 @@
         </div>
 
         <div class="p-6 bg-gray-50 border-t-2 border-black">
-            <p class="text-xs font-black uppercase mb-2">Comments & Action Points</p>
             <p id="card-action-points" class="text-sm text-black font-medium whitespace-pre-wrap min-h-[80px]"></p>
         </div>
     </div>
@@ -262,6 +261,23 @@
     </div>
 
     <script>
+        // Inline Service Worker via Blob to satisfy PWA installation criteria
+        if ('serviceWorker' in navigator) {
+            const swContent = `
+                self.addEventListener('install', (event) => {
+                    self.skipWaiting();
+                });
+                self.addEventListener('fetch', (event) => {
+                    event.respondWith(fetch(event.request));
+                });
+            `;
+            const blob = new Blob([swContent], { type: 'application/javascript' });
+            const workerUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(workerUrl, { scope: './' })
+                .then(() => console.log('Service Worker Registered'))
+                .catch(err => console.error('Service Worker Registration Failed', err));
+        }
+
         const AUDIT_STORAGE_KEY = 'maestroStoreCheckDataV1'; 
 
         const sections = [
@@ -512,26 +528,23 @@
             const rawDate = document.getElementById('date_of_visit').value;
             const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-GB') : "";
             
-            // Build the multi-part comments display for the PNG
-            let pngCommentsOutput = "COMMENTS:\n";
-            let sectionCommentsAdded = false;
+            // Build the multi-part text for PNG output
+            let combinedComments = "";
             sections.forEach(s => {
                 const sectionComment = document.querySelector(`[name="comment_${s.id}"]`).value.trim();
                 if (sectionComment) {
-                    pngCommentsOutput += `${s.title}: ${sectionComment}\n`;
-                    sectionCommentsAdded = true;
+                    combinedComments += `${s.title}: ${sectionComment}\n`;
                 }
             });
-            if (!sectionCommentsAdded) pngCommentsOutput += "None\n";
-
             const generalActionVal = document.getElementById('action_points').value.trim();
-            pngCommentsOutput += `\nACTION POINTS:\n${generalActionVal || "None"}`;
+
+            let pngOutput = "COMMENTS:\n" + (combinedComments || "None") + "\n\nACTION POINTS:\n" + (generalActionVal || "None");
 
             document.getElementById('card-maestro').innerHTML = maestroVal || '<span class="blank-line"></span>';
             document.getElementById('card-store').innerHTML = storeVal || '<span class="blank-line"></span>';
             document.getElementById('card-manager').innerHTML = managerVal || '<span class="blank-line"></span>';
             document.getElementById('card-date').innerHTML = dateStr || '<span class="blank-line"></span>';
-            document.getElementById('card-action-points').textContent = pngCommentsOutput;
+            document.getElementById('card-action-points').textContent = pngOutput;
             
             generateCardTable();
 
@@ -547,7 +560,7 @@
 
         document.getElementById('copy-report-button').addEventListener('click', () => {
             const rawDate = document.getElementById('date_of_visit').value;
-            const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-GB') : "";
+            const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-GB') : "[Date]";
             const storeStr = document.getElementById('store_number').value || "";
             const maestroStr = document.getElementById('audit_by').value || "";
             const managerStr = document.getElementById('manager_name').value || "";
@@ -587,6 +600,7 @@ Nero 90 Score: ${nero90Score}
 
 Comments:
 ${combinedComments || "None"}
+
 Action Points:
 ${generalActionVal || "None"}`;
 
