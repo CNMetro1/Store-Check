@@ -172,7 +172,7 @@
         </div>
 
         <div class="p-6 bg-gray-50 border-t-2 border-black">
-            <p class="text-xs font-black uppercase mb-2">Action Points</p>
+            <p class="text-xs font-black uppercase mb-2">Comments & Action Points</p>
             <p id="card-action-points" class="text-sm text-black font-medium whitespace-pre-wrap min-h-[80px]"></p>
         </div>
     </div>
@@ -512,22 +512,26 @@
             const rawDate = document.getElementById('date_of_visit').value;
             const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-GB') : "";
             
-            // Combine general comments with section-specific ones
-            let combinedComments = "";
+            // Build the multi-part comments display for the PNG
+            let pngCommentsOutput = "COMMENTS:\n";
+            let sectionCommentsAdded = false;
             sections.forEach(s => {
                 const sectionComment = document.querySelector(`[name="comment_${s.id}"]`).value.trim();
                 if (sectionComment) {
-                    combinedComments += `[${s.title}]\n${sectionComment}\n\n`;
+                    pngCommentsOutput += `${s.title}: ${sectionComment}\n`;
+                    sectionCommentsAdded = true;
                 }
             });
+            if (!sectionCommentsAdded) pngCommentsOutput += "None\n";
+
             const generalActionVal = document.getElementById('action_points').value.trim();
-            if (generalActionVal) combinedComments += `[General]\n${generalActionVal}`;
+            pngCommentsOutput += `\nACTION POINTS:\n${generalActionVal || "None"}`;
 
             document.getElementById('card-maestro').innerHTML = maestroVal || '<span class="blank-line"></span>';
             document.getElementById('card-store').innerHTML = storeVal || '<span class="blank-line"></span>';
             document.getElementById('card-manager').innerHTML = managerVal || '<span class="blank-line"></span>';
             document.getElementById('card-date').innerHTML = dateStr || '<span class="blank-line"></span>';
-            document.getElementById('card-action-points').textContent = combinedComments || 'No action points recorded.';
+            document.getElementById('card-action-points').textContent = pngCommentsOutput;
             
             generateCardTable();
 
