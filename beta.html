@@ -172,7 +172,7 @@
         </div>
 
         <div class="p-6 bg-gray-50 border-t-2 border-black">
-            <p class="text-xs font-black uppercase mb-2">Comments & Action Points</p>
+            <p class="text-xs font-black uppercase mb-2">Action Points</p>
             <p id="card-action-points" class="text-sm text-black font-medium whitespace-pre-wrap min-h-[80px]"></p>
         </div>
     </div>
@@ -238,7 +238,7 @@
             </div>
 
             <div class="p-6 border-t border-gray-200">
-                <h3 class="text-sm font-black uppercase mb-3">Comments & Action Points</h3>
+                <h3 class="text-sm font-black uppercase mb-3">Action Points</h3>
                 <textarea id="action_points" name="action_points" class="w-full p-4 bg-gray-50 border border-black rounded-sm min-h-[140px] outline-none" placeholder="Note down requirements for improvement..."></textarea>
             </div>
         </main>
@@ -527,7 +527,7 @@
             document.getElementById('card-store').innerHTML = storeVal || '<span class="blank-line"></span>';
             document.getElementById('card-manager').innerHTML = managerVal || '<span class="blank-line"></span>';
             document.getElementById('card-date').innerHTML = dateStr || '<span class="blank-line"></span>';
-            document.getElementById('card-action-points').textContent = combinedComments || 'No comments or action points recorded.';
+            document.getElementById('card-action-points').textContent = combinedComments || 'No action points recorded.';
             
             generateCardTable();
 
@@ -543,21 +543,21 @@
 
         document.getElementById('copy-report-button').addEventListener('click', () => {
             const rawDate = document.getElementById('date_of_visit').value;
-            const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-GB') : "[Date]";
+            const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('en-GB') : "";
             const storeStr = document.getElementById('store_number').value || "";
             const maestroStr = document.getElementById('audit_by').value || "";
             const managerStr = document.getElementById('manager_name').value || "";
             
-            // Combine all comments for text output
+            // Extract section-specific comments for the "Comments" field
             let combinedComments = "";
             sections.forEach(s => {
                 const sectionComment = document.querySelector(`[name="comment_${s.id}"]`).value.trim();
                 if (sectionComment) {
-                    combinedComments += `[${s.title}]: ${sectionComment}\n`;
+                    combinedComments += `${s.title}: ${sectionComment}\n`;
                 }
             });
+            
             const generalActionVal = document.getElementById('action_points').value.trim();
-            if (generalActionVal) combinedComments += `[General]: ${generalActionVal}`;
             
             // Extract scores
             let coffeeScore = "";
@@ -581,8 +581,10 @@ Store Manager: ${managerStr}
 Coffee Score: ${coffeeScore}
 Nero 90 Score: ${nero90Score}
 
-Comments & Action Points:
-${combinedComments || "None"}`;
+Comments:
+${combinedComments || "None"}
+Action Points:
+${generalActionVal || "None"}`;
 
             const el = document.createElement('textarea');
             el.value = text;
