@@ -153,7 +153,7 @@
                 <p id="card-manager" class="text-xl font-black uppercase"></p>
             </div>
             <div class="p-4">
-                <p class="card-label">Date</p>
+                <p class="card-label">Week Commencing</p>
                 <p id="card-date" class="text-xl font-black uppercase"></p>
             </div>
         </div>
@@ -541,7 +541,7 @@
             let pngOutput = "COMMENTS:\n" + (combinedComments || "None") + "\n\nACTION POINTS:\n" + (generalActionVal || "None");
 
             document.getElementById('card-maestro').innerHTML = maestroVal || '<span class="blank-line"></span>';
-            document.getElementById('card-store').innerHTML = storeVal || '<span class="blank-line"></span>';
+            document.getElementById('card-store').innerHTML = storeStr || '<span class="blank-line"></span>';
             document.getElementById('card-manager').innerHTML = managerVal || '<span class="blank-line"></span>';
             document.getElementById('card-date').innerHTML = dateStr || '<span class="blank-line"></span>';
             document.getElementById('card-action-points').textContent = pngOutput;
