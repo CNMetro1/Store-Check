@@ -152,7 +152,7 @@
                 <p id="card-manager" class="text-xl font-black uppercase"></p>
             </div>
             <div class="p-4">
-                <p class="card-label">Date</p>
+                <p class="card-label">Week Commencing</p>
                 <p id="card-date" class="text-xl font-black uppercase"></p>
             </div>
         </div>
@@ -193,7 +193,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-[10px] font-black text-gray-400 uppercase mb-1">Date of Visit</label>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase mb-1">Week Commencing</label>
                         <input type="date" id="date_of_visit" name="date_of_visit" class="w-full p-2 border-b-2 border-black outline-none focus:bg-gray-50">
                     </div>
                     <div>
@@ -589,7 +589,7 @@
             }));
 
             const text = `MAESTRO STORE CHECK
-Date: ${dateStr}
+Week Commencing: ${dateStr}
 Store: ${storeStr}
 Maestro: ${maestroStr}
 Store Manager: ${managerStr}
@@ -667,5 +667,4 @@ ${generalActionVal || "None"}`;
     </script>
 </body>
 </html>
-
 
